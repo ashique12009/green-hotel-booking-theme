@@ -1,23 +1,44 @@
-name: Publish Website
+# name: Publish Website
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+
+# jobs:
+#   web-deploy:
+#     name: 🚀 Deploy Website Every Commit
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: 🚚 Get Latest Code
+#       uses: actions/checkout@v3
+    
+#     - name: 📂 Sync Files to EC2
+#       uses: SamKirkland/web-deploy@v1
+#       with:
+#         target-server: http://3.91.248.211/
+#         remote-user: ec2-user
+#         private-ssh-key: ${{ secrets.SSH_KEY }}
+#         destination-path: /var/www/html/wp-content/themes/green-hotel-booking/
+name: Test EC2 SSH
 
 on:
   push:
     branches:
       - main
 
-
 jobs:
-  web-deploy:
-    name: 🚀 Deploy Website Every Commit
+  test:
     runs-on: ubuntu-latest
+
     steps:
-    - name: 🚚 Get Latest Code
-      uses: actions/checkout@v3
-    
-    - name: 📂 Sync Files to EC2
-      uses: SamKirkland/web-deploy@v1
-      with:
-        target-server: http://3.91.248.211/
-        remote-user: ec2-user
-        private-ssh-key: ${{ secrets.SSH_KEY }}
-        destination-path: /var/www/html/wp-content/themes/green-hotel-booking/
+      - name: Test SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/ec2.pem
+          chmod 600 ~/.ssh/ec2.pem
+          ssh -o StrictHostKeyChecking=no \
+            -i ~/.ssh/ec2.pem \
+            ec2-user@3.91.248.211 \
+            "whoami && hostname"
