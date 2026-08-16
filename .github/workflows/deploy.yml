@@ -21,7 +21,29 @@
 #         remote-user: ec2-user
 #         private-ssh-key: ${{ secrets.SSH_KEY }}
 #         destination-path: /var/www/html/wp-content/themes/green-hotel-booking/
-name: Test EC2 SSH
+# name: Test EC2 SSH
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Test SSH Connection
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/ec2.pem
+#           chmod 600 ~/.ssh/ec2.pem
+#           ssh -o StrictHostKeyChecking=no \
+#             -i ~/.ssh/ec2.pem \
+#             ec2-user@3.91.248.211 \
+#             "whoami && hostname"
+
+name: Deploy WordPress Theme
 
 on:
   push:
@@ -29,16 +51,30 @@ on:
       - main
 
 jobs:
-  test:
+  deploy:
+    name: 🚀 Deploy Theme
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH Connection
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/ec2.pem
           chmod 600 ~/.ssh/ec2.pem
+
+      - name: Test SSH
+        run: |
           ssh -o StrictHostKeyChecking=no \
             -i ~/.ssh/ec2.pem \
             ec2-user@3.91.248.211 \
-            "whoami && hostname"
+            "whoami && ls -ld /var/www/html/wp-content/themes/green-hotel-booking"
+
+      - name: Deploy Theme
+        run: |
+          rsync -avz \
+            -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2.pem" \
+            ./ \
+            ec2-user@3.91.248.211:/var/www/html/wp-content/themes/green-hotel-booking/
