@@ -20,7 +20,7 @@
 #         target-server: http://3.91.248.211/
 #         remote-user: ec2-user
 #         private-ssh-key: ${{ secrets.SSH_KEY }}
-#         destination-path: /var/www/html/wp-content/themes/green-hotel-booking/
+#         destination-path: /var/www/html/wordpress/wp-content/themes/green-hotel-booking/
 # name: Test EC2 SSH
 
 # on:
@@ -70,11 +70,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
             -i ~/.ssh/ec2.pem \
             ec2-user@3.91.248.211 \
-            "whoami && ls -ld /var/www/html/wp-content/themes/green-hotel-booking"
+            "whoami && ls -ld /var/www/html/wordpress/wp-content/themes/green-hotel-booking"
 
       - name: Deploy Theme
         run: |
           rsync -avz \
             -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2.pem" \
             ./ \
-            ec2-user@3.91.248.211:/var/www/html/wp-content/themes/green-hotel-booking/
+            ec2-user@3.91.248.211:/var/www/html/wordpress/wp-content/themes/green-hotel-booking/
